@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM · Recolocação Marcos Franco</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+  input, select, textarea, button { font-family: inherit; }
+  input, select, textarea { font-size: 13px; padding: 7px 10px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: #fafaf7; color: #1a1a1a; width: 100%; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: #999; }
+  button { cursor: pointer; }
+
+  .app { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 8px; }
+  .header-title { font-size: 18px; font-weight: 500; color: #1a1a1a; }
+  .header-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; border-bottom: 0.5px solid #e0e0d8; padding-bottom: 1rem; }
+  .tab-btn { font-size: 13px; padding: 7px 18px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #888; font-weight: 400; transition: all 0.15s; }
+  .tab-btn.active { background: #fff; color: #1a1a1a; font-weight: 500; border-color: #bbb; }
+  .tab-btn:hover { background: #f0f0eb; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Assistant */
+  .assistant-info { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 13px; color: #666; line-height: 1.6; }
+  .api-setup { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .api-setup label { font-size: 12px; color: #888; display: block; margin-bottom: 6px; }
+  .api-setup input { font-size: 13px; }
+  .api-save-btn { margin-top: 8px; font-size: 12px; padding: 5px 14px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #1a1a1a; }
+  .api-saved { font-size: 11px; color: #639922; margin-top: 4px; display: none; }
+
+  .chat-box { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; min-height: 200px; max-height: 340px; overflow-y: auto; }
+  .chat-empty { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
+  .msg { display: flex; margin-bottom: 10px; }
+  .msg.user { justify-content: flex-end; }
+  .msg.assistant { justify-content: flex-start; }
+  .msg-bubble { max-width: 85%; padding: 9px 13px; border-radius: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+  .msg.user .msg-bubble { background: #E6F1FB; color: #0C447C; border-radius: 12px 12px 2px 12px; }
+  .msg.assistant .msg-bubble { background: #f5f5f0; color: #1a1a1a; border-radius: 12px 12px 12px 2px; }
+
+  .examples { margin-bottom: 1rem; }
+  .examples-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .example-btn { display: block; width: 100%; text-align: left; font-size: 12px; padding: 6px 10px; margin-bottom: 4px; border: 0.5px solid #e0e0d8; border-radius: 8px; background: transparent; color: #666; }
+  .example-btn:hover { background: #f5f5f0; }
+
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input-row input { flex: 1; }
+  .send-btn { padding: 7px 18px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: #1a1a1a; color: #fff; font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .send-btn:hover { background: #333; }
+  .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Summary cards */
+  .summary { display: flex; gap: 12px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .summary-card { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 8px; padding: 10px 16px; flex: 1; min-width: 80px; text-align: center; }
+  .summary-num { font-size: 22px; font-weight: 500; color: #1a1a1a; }
+  .summary-label { font-size: 12px; color: #888; }
+
+  /* Filters */
+  .filters { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-btn { font-size: 12px; padding: 4px 12px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #888; }
+  .filter-btn.active { background: #fff; color: #1a1a1a; font-weight: 500; border-color: #bbb; }
+
+  /* Legend */
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #888; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* Kanban */
+  .kanban { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; }
+  @media (max-width: 700px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+  .kanban-col-header { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: #888; padding-bottom: 7px; border-bottom: 0.5px solid #e0e0d8; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .kanban-count { font-size: 11px; background: #f5f5f0; border-radius: 10px; padding: 1px 6px; }
+  .kanban-empty { font-size: 12px; color: #ccc; }
+  .card { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 10px; padding: 9px 11px; margin-bottom: 8px; cursor: pointer; transition: box-shadow 0.15s; }
+  .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .card-name { font-size: 13px; font-weight: 500; color: #1a1a1a; margin-bottom: 2px; }
+  .card-role { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .card-next { font-size: 11px; color: #aaa; margin-top: 5px; }
+  .plan-badge { font-size: 11px; padding: 2px 7px; border-radius: 6px; font-weight: 500; display: inline-block; }
+
+  /* Tasks */
+  .task-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: #fff; border: 0.5px solid #e0e0d8; border-radius: 10px; margin-bottom: 6px; }
+  .task-row.done { opacity: 0.5; }
+  .task-check { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+  .task-body { flex: 1; min-width: 0; }
+  .task-text { font-size: 13px; color: #1a1a1a; margin-bottom: 4px; }
+  .task-row.done .task-text { text-decoration: line-through; }
+  .task-meta { display: flex; gap: 6px; align-items: center; }
+  .priority-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .priority-label { font-size: 11px; }
+  .edit-btn { font-size: 11px; padding: 3px 8px; border: 0.5px solid #e0e0d8; border-radius: 8px; background: transparent; color: #888; flex-shrink: 0; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: #fff; border: 0.5px solid #e0e0d8; border-radius: 12px; padding: 1.25rem; width: min(420px, 90vw); max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 15px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: space-between; margin-top: 1rem; }
+  .modal-actions-right { display: flex; gap: 8px; margin-left: auto; }
+  .btn { font-size: 13px; padding: 6px 14px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #1a1a1a; }
+  .btn:hover { background: #f5f5f0; }
+  .btn-primary { font-weight: 500; background: #f5f5f0; }
+  .btn-danger { font-size: 12px; padding: 6px 12px; border: 0.5px solid #e05050; border-radius: 8px; background: transparent; color: #c0392b; }
+  .add-btn { font-size: 13px; padding: 6px 14px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #1a1a1a; }
+
+  .done-toggle { font-size: 12px; padding: 4px 12px; border: 0.5px solid #d0d0c8; border-radius: 8px; background: transparent; color: #888; }
+  .section-divider { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.04em; margin: 1rem 0 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="header-title">Recolocação · Marcos Franco</div>
+      <div class="header-sub" id="header-sub">carregando...</div>
+    </div>
+    <div id="header-actions"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setTab('assistant')">Assistente IA</button>
+    <button class="tab-btn" onclick="setTab('crm')">CRM · Pipeline</button>
+    <button class="tab-btn" onclick="setTab('tasks')" id="tasks-tab-btn">Pendências</button>
+  </div>
+
+  <!-- ASSISTANT -->
+  <div class="section active" id="section-assistant">
+    <div class="assistant-info">
+      Digite em linguagem natural o que aconteceu — o assistente interpreta e atualiza o CRM e as pendências automaticamente. Ex: <em>"Aldo: ligar amanhã confirmado"</em> ou <em>"Bosquetti confirmou o café na quinta"</em>.
+    </div>
+    <div class="api-setup" id="api-setup">
+      <label>Chave da API do Claude (necessária para o Assistente IA funcionar)</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-..." />
+      <button class="api-save-btn" onclick="saveApiKey()">Salvar chave</button>
+      <div class="api-saved" id="api-saved">✓ Chave salva com segurança no seu navegador</div>
+    </div>
+    <div class="chat-box" id="chat-box">
+      <div class="chat-empty" id="chat-empty">Diga o que aconteceu e eu atualizo o painel automaticamente.</div>
+    </div>
+    <div class="examples" id="examples-section">
+      <div class="examples-label">Exemplos</div>
+      <button class="example-btn" onclick="useExample(this)">Aldo: ligar amanhã de manhã confirmado</button>
+      <button class="example-btn" onclick="useExample(this)">Bosquetti confirmou o café na quinta-feira</button>
+      <button class="example-btn" onclick="useExample(this)">Adicionar contato: João Silva, CEO da Empresa X, Plano A</button>
+      <button class="example-btn" onclick="useExample(this)">Marcar tarefa do CV como concluída</button>
+      <button class="example-btn" onclick="useExample(this)">Ronny avançou para negociando, está quente</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ex: Aldo confirmou reunião para sexta..." onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="send-btn" id="send-btn" onclick="sendChat()">Enviar</button>
+    </div>
+  </div>
+
+  <!-- CRM -->
+  <div class="section" id="section-crm">
+    <div class="legend" id="crm-legend"></div>
+    <div class="filters" id="crm-filters"></div>
+    <div class="kanban" id="kanban"></div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="section" id="section-tasks">
+    <div class="summary" id="tasks-summary"></div>
+    <div class="filters" id="tasks-filters"></div>
+    <div id="tasks-list"></div>
+  </div>
+</div>
+
+<!-- MODAL CONTACT -->
+<div class="modal-overlay" id="contact-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="contact-modal-title">Contato</div>
+    <div class="form-group"><label class="form-label">Nome</label><input id="cf-name" /></div>
+    <div class="form-group"><label class="form-label">Cargo / Empresa</label><input id="cf-role" /></div>
+    <div class="form-group"><label class="form-label">Próximo passo</label><input id="cf-next" /></div>
+    <div class="form-grid">
+      <div><label class="form-label">Plano</label><select id="cf-plan"><option>A</option><option>B</option><option>C</option></select></div>
+      <div><label class="form-label">Estágio</label><select id="cf-stage"></select></div>
+      <div><label class="form-label">Status</label><select id="cf-status"></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="contact-delete-btn" onclick="deleteContact()">Remover</button>
+      <div class="modal-actions-right">
+        <button class="btn" onclick="closeContactModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitContact()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TASK -->
+<div class="modal-overlay" id="task-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="task-modal-title">Pendência</div>
+    <div class="form-group"><label class="form-label">Descrição</label><textarea id="tf-text" rows="2" style="resize:vertical;"></textarea></div>
+    <div class="form-grid-2">
+      <div><label class="form-label">Plano</label><select id="tf-plan"><option>A</option><option>B</option><option>C</option></select></div>
+      <div><label class="form-label">Prioridade</label><select id="tf-priority"><option value="alta">alta</option><option value="media">media</option><option value="baixa">baixa</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="task-delete-btn" onclick="deleteTask()">Remover</button>
+      <div class="modal-actions-right">
+        <button class="btn" onclick="closeTaskModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="submitTask()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STAGES = [
+  { key: "identificado", label: "Identificado" },
+  { key: "contato_feito", label: "Contato feito" },
+  { key: "cultivar", label: "Cultivando" },
+  { key: "negociando", label: "Negociando" },
+  { key: "convertido", label: "Convertido" },
+];
+const STATUS_OPTS = [
+  { key: "hot", label: "Quente", color: "#E24B4A" },
+  { key: "warm", label: "Morno", color: "#EF9F27" },
+  { key: "cold", label: "Frio", color: "#378ADD" },
+  { key: "new", label: "Novo", color: "#888780" },
+];
+const PLAN_STYLES = {
+  A: { bg: "#E6F1FB", color: "#0C447C" },
+  B: { bg: "#EAF3DE", color: "#27500A" },
+  C: { bg: "#EEEDFE", color: "#3C3489" },
+};
+const PRIORITY = {
+  alta: { bg: "#FCEBEB", color: "#A32D2D", dot: "#E24B4A" },
+  media: { bg: "#FAEEDA", color: "#633806", dot: "#EF9F27" },
+  baixa: { bg: "#EAF3DE", color: "#27500A", dot: "#639922" },
+};
+
+const DEFAULT_CONTACTS = [
+  { id: 1, name: "Eduardo Bosquetti", role: "CEO · RPC", plan: "A", stage: "cultivar", status: "hot", next: "Convidar para missa 7h30 + café" },
+  { id: 2, name: "Pedro Joanir Zonta", role: "Proprietário · Grupo Condor", plan: "A", stage: "cultivar", status: "warm", next: "Aproximação estratégica" },
+  { id: 3, name: "Thiago Ayres", role: "Sócio · Consigliere Consultoria", plan: "B", stage: "negociando", status: "hot", next: "Parceria confirmada; prospect em negociação" },
+  { id: 4, name: "Ronny Essert", role: "Superintendente · GERAR", plan: "B", stage: "cultivar", status: "warm", next: "Enviar material de societal marketing" },
+  { id: 5, name: "Augusto Michells", role: "Gerente Regional · AHK", plan: "B", stage: "contato_feito", status: "cold", next: "Follow-up pós-evento AHK" },
+  { id: 6, name: "Erlei Guimarães", role: "CEO · Beeotec", plan: "A", stage: "cultivar", status: "warm", next: "Contato MBA FGV – reativar" },
+  { id: 7, name: "Dr. Charles London", role: "Contato pessoal estratégico", plan: "A", stage: "cultivar", status: "warm", next: "Consulta médica como pretexto natural" },
+  { id: 8, name: "Aldo Mallucelli", role: "Amigo próximo", plan: "A", stage: "cultivar", status: "cold", next: "Ligar amanhã de manhã para remarcar" },
+  { id: 9, name: "Watanabe", role: "Empresário · Máquinas (via Gureck)", plan: "B", stage: "identificado", status: "new", next: "Primeiro contato a definir" },
+];
+const DEFAULT_TASKS = [
+  { id: 1, text: "Buscar vagas C-Level e adaptar CV por vaga", plan: "A", priority: "alta", done: false },
+  { id: 2, text: "Cadastro em headhunters C-Level", plan: "A", priority: "alta", done: false },
+  { id: 3, text: "Convidar Eduardo Bosquetti para missa 7h30 + café", plan: "A", priority: "alta", done: false },
+  { id: 4, text: "Ligar para Aldo Mallucelli amanhã de manhã para remarcar", plan: "A", priority: "alta", done: false },
+  { id: 5, text: "Enviar material de societal marketing para Ronny Essert", plan: "B", priority: "media", done: false },
+  { id: 6, text: "Mapear Watanabe via Leonardo Gureck Neto", plan: "B", priority: "media", done: false },
+  { id: 7, text: "Reativar Dr. Charles London via consulta médica", plan: "A", priority: "media", done: false },
+  { id: 8, text: "Identificar contatos Opus Dei no próximo encontro", plan: "A", priority: "baixa", done: false },
+];
+
+let contacts = [], tasks = [], chatMessages = [];
+let planFilter = "todos", taskFilter = "todos", showDone = false;
+let editingContactId = null, editingTaskId = null;
+let currentTab = "assistant";
+
+function load() {
+  try { contacts = JSON.parse(localStorage.getItem("crm_contacts") || "null") || DEFAULT_CONTACTS; } catch { contacts = DEFAULT_CONTACTS; }
+  try { tasks = JSON.parse(localStorage.getItem("crm_tasks") || "null") || DEFAULT_TASKS; } catch { tasks = DEFAULT_TASKS; }
+  try { chatMessages = JSON.parse(localStorage.getItem("crm_chat") || "[]"); } catch { chatMessages = []; }
+  const key = localStorage.getItem("claude_api_key");
+  if (key) { document.getElementById("api-key-input").value = key; document.getElementById("api-saved").style.display = "block"; }
+  renderAll();
+}
+
+function saveContacts() { localStorage.setItem("crm_contacts", JSON.stringify(contacts)); }
+function saveTasks() { localStorage.setItem("crm_tasks", JSON.stringify(tasks)); }
+function saveChat() { localStorage.setItem("crm_chat", JSON.stringify(chatMessages.slice(-30))); }
+
+function saveApiKey() {
+  const key = document.getElementById("api-key-input").value.trim();
+  if (!key) return;
+  localStorage.setItem("claude_api_key", key);
+  document.getElementById("api-saved").style.display = "block";
+}
+
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll(".tab-btn").forEach((b,i) => {
+    const tabs = ["assistant","crm","tasks"];
+    b.classList.toggle("active", tabs[i] === tab);
+  });
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById("section-" + tab).classList.add("active");
+  if (tab === "crm") renderCRM();
+  if (tab === "tasks") renderTasks();
+  updateHeaderActions();
+}
+
+function updateHeaderActions() {
+  const el = document.getElementById("header-actions");
+  if (currentTab === "crm") el.innerHTML = `<button class="add-btn" onclick="openAddContact()">+ Contato</button>`;
+  else if (currentTab === "tasks") el.innerHTML = `<button class="add-btn" onclick="openAddTask()">+ Pendência</button>`;
+  else el.innerHTML = "";
+}
+
+function updateHeaderSub() {
+  const pending = tasks.filter(t => !t.done).length;
+  document.getElementById("header-sub").textContent = `${contacts.length} contatos · ${pending} pendências`;
+  const tb = document.getElementById("tasks-tab-btn");
+  if (tb) tb.textContent = pending > 0 ? `Pendências (${pending})` : "Pendências";
+}
+
+function renderAll() { renderCRM(); renderTasks(); renderChat(); updateHeaderSub(); updateHeaderActions(); }
+
+function renderCRM() {
+  const legend = document.getElementById("crm-legend");
+  if (legend) legend.innerHTML = STATUS_OPTS.map(s => `<div class="legend-item"><span class="legend-dot" style="background:${s.color}"></span>${s.label}</div>`).join("");
+
+  const filters = document.getElementById("crm-filters");
+  if (filters) filters.innerHTML = ["todos","A","B","C"].map(p =>
+    `<button class="filter-btn ${planFilter===p?"active":""}" onclick="setPlanFilter('${p}')">${p==="todos"?"Todos":"Plano "+p}</button>`
+  ).join("") ;
+
+  const filtered = planFilter === "todos" ? contacts : contacts.filter(c => c.plan === planFilter);
+  const kanban = document.getElementById("kanban");
+  if (!kanban) return;
+
+  const stageEl = document.getElementById("cf-stage");
+  if (stageEl && !stageEl.children.length) STAGES.forEach(s => { const o = document.createElement("option"); o.value = s.key; o.textContent = s.label; stageEl.appendChild(o); });
+  const statusEl = document.getElementById("cf-status");
+  if (statusEl && !statusEl.children.length) STATUS_OPTS.forEach(s => { const o = document.createElement("option"); o.value = s.key; o.textContent = s.label; statusEl.appendChild(o); });
+
+  kanban.innerHTML = STAGES.map(s => {
+    const cards = filtered.filter(c => c.stage === s.key);
+    return `<div>
+      <div class="kanban-col-header">${s.label}<span class="kanban-count">${cards.length}</span></div>
+      ${cards.length === 0 ? `<div class="kanban-empty">—</div>` :
+        cards.map(c => {
+          const sc = STATUS_OPTS.find(o => o.key === c.status)?.color || "#888";
+          const ps = PLAN_STYLES[c.plan] || PLAN_STYLES.A;
+          return `<div class="card" style="border-left:3px solid ${sc}" onclick="openEditContact(${c.id})">
+            <div class="card-name">${c.name}</div>
+            <div class="card-role">${c.role}</div>
+            <span class="plan-badge" style="background:${ps.bg};color:${ps.color}">Plano ${c.plan}</span>
+            <div class="card-next">${c.next}</div>
+          </div>`;
+        }).join("")}
+    </div>`;
+  }).join("");
+}
+
+function renderTasks() {
+  const summary = document.getElementById("tasks-summary");
+  if (summary) {
+    const p = tasks.filter(t=>!t.done).length, d = tasks.filter(t=>t.done).length;
+    summary.innerHTML = [["pendentes",p],["concluídas",d],["total",tasks.length]].map(([l,n]) =>
+      `<div class="summary-card"><div class="summary-num">${n}</div><div class="summary-label">${l}</div></div>`).join("");
+  }
+  const filters = document.getElementById("tasks-filters");
+  if (filters) filters.innerHTML = ["todos","A","B","C"].map(p =>
+    `<button class="filter-btn ${taskFilter===p?"active":""}" onclick="setTaskFilter('${p}')">${p==="todos"?"Todos":"Plano "+p}</button>`
+  ).join("") + `<button class="done-toggle" onclick="toggleDone()">${showDone?"Ocultar concluídas":"Ver concluídas"}</button>`;
+
+  let list = taskFilter === "todos" ? tasks : tasks.filter(t => t.plan === taskFilter);
+  if (!showDone) list = list.filter(t => !t.done);
+  const pending = list.filter(t => !t.done);
+  const done = list.filter(t => t.done);
+
+  const taskRow = t => {
+    const pr = PRIORITY[t.priority] || PRIORITY.media;
+    const ps = PLAN_STYLES[t.plan] || PLAN_STYLES.A;
+    return `<div class="task-row ${t.done?"done":""}">
+      <input type="checkbox" class="task-check" ${t.done?"checked":""} onchange="toggleTask(${t.id})" />
+      <div class="task-body">
+        <div class="task-text">${t.text}</div>
+        <div class="task-meta">
+          <span class="plan-badge" style="background:${ps.bg};color:${ps.color};font-size:11px;padding:2px 7px;">Plano ${t.plan}</span>
+          <span class="priority-dot" style="background:${pr.dot}"></span>
+          <span class="priority-label" style="color:${pr.color};font-size:11px;">${t.priority}</span>
+        </div>
+      </div>
+      <button class="edit-btn" onclick="openEditTask(${t.id})">editar</button>
+    </div>`;
+  };
+
+  const el = document.getElementById("tasks-list");
+  if (el) el.innerHTML = pending.map(taskRow).join("") +
+    (done.length > 0 && showDone ? `<div class="section-divider">Concluídas</div>${done.map(taskRow).join("")}` : "") +
+    (pending.length === 0 && done.length === 0 ? `<div style="font-size:13px;color:#aaa;padding:1rem 0;">Nenhuma pendência neste filtro.</div>` : "");
+}
+
+function renderChat() {
+  const box = document.getElementById("chat-box");
+  if (!box) return;
+  if (chatMessages.length === 0) { box.innerHTML = `<div class="chat-empty">Diga o que aconteceu e eu atualizo o painel automaticamente.</div>`; return; }
+  box.innerHTML = chatMessages.slice(-20).map(m =>
+    `<div class="msg ${m.role}"><div class="msg-bubble">${m.text.replace(/</g,"&lt;")}</div></div>`
+  ).join("");
+  box.scrollTop = box.scrollHeight;
+  document.getElementById("examples-section").style.display = "none";
+}
+
+function setPlanFilter(f) { planFilter = f; renderCRM(); }
+function setTaskFilter(f) { taskFilter = f; renderTasks(); }
+function toggleDone() { showDone = !showDone; renderTasks(); }
+function toggleTask(id) { tasks = tasks.map(t => t.id === id ? {...t, done: !t.done} : t); saveTasks(); renderTasks(); updateHeaderSub(); }
+
+function useExample(btn) { document.getElementById("chat-input").value = btn.textContent; document.getElementById("chat-input").focus(); }
+
+async function sendChat() {
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+  const apiKey = localStorage.getItem("claude_api_key");
+  if (!apiKey) { alert("Por favor, salve sua chave da API do Claude primeiro."); return; }
+
+  input.value = "";
+  chatMessages.push({ role: "user", text, ts: Date.now() });
+  saveChat(); renderChat();
+
+  const btn = document.getElementById("send-btn");
+  btn.disabled = true; btn.textContent = "...";
+
+  const systemPrompt = `Você é um assistente de CRM integrado ao pipeline de recolocação de Marcos Ribeiro Franco, executivo sênior em Curitiba buscando C-Level.
+
+CONTATOS ATUAIS: ${JSON.stringify(contacts.map(c=>({id:c.id,name:c.name,role:c.role,plan:c.plan,stage:c.stage,status:c.status,next:c.next})))}
+TAREFAS ATUAIS: ${JSON.stringify(tasks.map(t=>({id:t.id,text:t.text,plan:t.plan,priority:t.priority,done:t.done})))}
+
+Estágios: identificado, contato_feito, cultivar, negociando, convertido
+Status: hot, warm, cold, new | Planos: A, B, C | Prioridades: alta, media, baixa
+
+Interprete o que Marcos disser e responda de forma calorosa e concisa em português.
+SEMPRE retorne ações em <actions>[...]</actions> no final. Use:
+{"type":"update_contact","id":N,"changes":{...}}
+{"type":"update_task","id":N,"changes":{...}}
+{"type":"add_task","text":"...","plan":"A","priority":"media"}
+{"type":"add_contact","name":"...","role":"...","plan":"A","stage":"identificado","status":"new","next":"..."}
+Se não houver ações: <actions>[]</actions>`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: chatMessages.slice(-10).map(m => ({ role: m.role, content: m.text }))
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.map(b => b.text || "").join("") || "Não consegui processar.";
+    const actionMatch = raw.match(/<actions>([\s\S]*?)<\/actions>/);
+    const display = raw.replace(/<actions>[\s\S]*?<\/actions>/g, "").trim();
+
+    if (actionMatch) {
+      try {
+        const actions = JSON.parse(actionMatch[1]);
+        for (const a of actions) {
+          if (a.type === "update_contact") contacts = contacts.map(c => c.id === a.id ? {...c,...a.changes} : c);
+          else if (a.type === "update_task") tasks = tasks.map(t => t.id === a.id ? {...t,...a.changes} : t);
+          else if (a.type === "add_task") tasks.push({ id: Date.now(), text: a.text, plan: a.plan||"A", priority: a.priority||"media", done: false });
+          else if (a.type === "add_contact") contacts.push({ id: Date.now(), name: a.name, role: a.role||"", plan: a.plan||"A", stage: a.stage||"identificado", status: a.status||"new", next: a.next||"" });
+        }
+        saveContacts(); saveTasks();
+      } catch(e) {}
+    }
+    chatMessages.push({ role: "assistant", text: display, ts: Date.now() });
+  } catch(e) {
+    chatMessages.push({ role: "assistant", text: "Erro de conexão. Verifique sua chave de API.", ts: Date.now() });
+  }
+
+  saveChat(); renderChat(); renderCRM(); renderTasks(); updateHeaderSub();
+  btn.disabled = false; btn.textContent = "Enviar";
+}
+
+// Contact Modal
+function openAddContact() {
+  editingContactId = null;
+  document.getElementById("contact-modal-title").textContent = "Novo contato";
+  document.getElementById("cf-name").value = "";
+  document.getElementById("cf-role").value = "";
+  document.getElementById("cf-next").value = "";
+  document.getElementById("cf-plan").value = "A";
+  document.getElementById("cf-stage").value = "identificado";
+  document.getElementById("cf-status").value = "new";
+  document.getElementById("contact-delete-btn").style.display = "none";
+  document.getElementById("contact-modal").style.display = "flex";
+}
+function openEditContact(id) {
+  const c = contacts.find(x => x.id === id);
+  if (!c) return;
+  editingContactId = id;
+  document.getElementById("contact-modal-title").textContent = "Editar contato";
+  document.getElementById("cf-name").value = c.name;
+  document.getElementById("cf-role").value = c.role;
+  document.getElementById("cf-next").value = c.next;
+  document.getElementById("cf-plan").value = c.plan;
+  document.getElementById("cf-stage").value = c.stage;
+  document.getElementById("cf-status").value = c.status;
+  document.getElementById("contact-delete-btn").style.display = "inline-block";
+  document.getElementById("contact-modal").style.display = "flex";
+}
+function closeContactModal() { document.getElementById("contact-modal").style.display = "none"; }
+function submitContact() {
+  const name = document.getElementById("cf-name").value.trim();
+  if (!name) return;
+  const data = { name, role: document.getElementById("cf-role").value, next: document.getElementById("cf-next").value, plan: document.getElementById("cf-plan").value, stage: document.getElementById("cf-stage").value, status: document.getElementById("cf-status").value };
+  if (editingContactId === null) contacts.push({ id: Date.now(), ...data });
+  else contacts = contacts.map(c => c.id === editingContactId ? {...c,...data} : c);
+  saveContacts(); closeContactModal(); renderCRM(); updateHeaderSub();
+}
+function deleteContact() {
+  if (!confirm("Remover este contato?")) return;
+  contacts = contacts.filter(c => c.id !== editingContactId);
+  saveContacts(); closeContactModal(); renderCRM(); updateHeaderSub();
+}
+
+// Task Modal
+function openAddTask() {
+  editingTaskId = null;
+  document.getElementById("task-modal-title").textContent = "Nova pendência";
+  document.getElementById("tf-text").value = "";
+  document.getElementById("tf-plan").value = "A";
+  document.getElementById("tf-priority").value = "media";
+  document.getElementById("task-delete-btn").style.display = "none";
+  document.getElementById("task-modal").style.display = "flex";
+}
+function openEditTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingTaskId = id;
+  document.getElementById("task-modal-title").textContent = "Editar pendência";
+  document.getElementById("tf-text").value = t.text;
+  document.getElementById("tf-plan").value = t.plan;
+  document.getElementById("tf-priority").value = t.priority;
+  document.getElementById("task-delete-btn").style.display = "inline-block";
+  document.getElementById("task-modal").style.display = "flex";
+}
+function closeTaskModal() { document.getElementById("task-modal").style.display = "none"; }
+function submitTask() {
+  const text = document.getElementById("tf-text").value.trim();
+  if (!text) return;
+  const data = { text, plan: document.getElementById("tf-plan").value, priority: document.getElementById("tf-priority").value };
+  if (editingTaskId === null) tasks.push({ id: Date.now(), done: false, ...data });
+  else tasks = tasks.map(t => t.id === editingTaskId ? {...t,...data} : t);
+  saveTasks(); closeTaskModal(); renderTasks(); updateHeaderSub();
+}
+function deleteTask() {
+  if (!confirm("Remover esta pendência?")) return;
+  tasks = tasks.filter(t => t.id !== editingTaskId);
+  saveTasks(); closeTaskModal(); renderTasks(); updateHeaderSub();
+}
+
+load();
+</script>
+</body>
+</html>
