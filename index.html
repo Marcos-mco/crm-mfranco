@@ -434,6 +434,7 @@ Estágios: identificado, contato_feito, cultivar, negociando, convertido
 Status: hot, warm, cold, new | Planos: A, B, C | Prioridades: alta, media, baixa
 
 Interprete o que Marcos disser e responda de forma calorosa e concisa em português.
+REGRA IMPORTANTE: Quando Marcos mencionar uma ação ou próximo passo para um contato, SEMPRE atualize o campo "next" desse contato com o novo texto exato que ele disse. Substitua completamente o valor anterior — nunca mantenha o texto antigo.
 SEMPRE retorne ações em <actions>[...]</actions> no final. Use:
 {"type":"update_contact","id":N,"changes":{...}}
 {"type":"update_task","id":N,"changes":{...}}
@@ -446,7 +447,7 @@ Se não houver ações: <actions>[]</actions>`;
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-opus-4-5",
         max_tokens: 1000,
         system: systemPrompt,
         messages: chatMessages.slice(-10).map(m => ({ role: m.role, content: m.text }))
