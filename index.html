@@ -435,11 +435,16 @@ Status: hot, warm, cold, new | Planos: A, B, C | Prioridades: alta, media, baixa
 
 Interprete o que Marcos disser e responda de forma calorosa e concisa em português.
 REGRA IMPORTANTE: Quando Marcos mencionar uma ação ou próximo passo para um contato, SEMPRE atualize o campo "next" desse contato com o novo texto exato que ele disse. Substitua completamente o valor anterior — nunca mantenha o texto antigo.
+REGRA ANTI-DUPLICATA: Antes de criar uma nova tarefa com add_task, verifique se já existe tarefa com texto similar na lista. Se existir, use update_task para atualizar — NUNCA adicione tarefa duplicada.
+REGRA replace_tasks: Use replace_tasks APENAS quando Marcos pedir explicitamente para substituir ou reorganizar TODA a lista de pendências. Esta ação apaga tudo e recria do zero.
 SEMPRE retorne ações em <actions>[...]</actions> no final. Use:
 {"type":"update_contact","id":N,"changes":{...}}
 {"type":"update_task","id":N,"changes":{...}}
 {"type":"add_task","text":"...","plan":"A","priority":"media"}
 {"type":"add_contact","name":"...","role":"...","plan":"A","stage":"identificado","status":"new","next":"..."}
+{"type":"delete_task","id":N}
+{"type":"delete_contact","id":N}
+{"type":"replace_tasks","tasks":[{"text":"...","plan":"A","priority":"alta"},...]}
 Se não houver ações: <actions>[]</actions>`;
 
   try {
@@ -464,8 +469,11 @@ Se não houver ações: <actions>[]</actions>`;
         for (const a of actions) {
           if (a.type === "update_contact") contacts = contacts.map(c => c.id === a.id ? {...c,...a.changes} : c);
           else if (a.type === "update_task") tasks = tasks.map(t => t.id === a.id ? {...t,...a.changes} : t);
-          else if (a.type === "add_task") tasks.push({ id: Date.now(), text: a.text, plan: a.plan||"A", priority: a.priority||"media", done: false });
+          else if (a.type === "add_task") tasks.push({ id: Date.now()+ Math.floor(Math.random()*9999), text: a.text, plan: a.plan||"A", priority: a.priority||"media", done: false });
           else if (a.type === "add_contact") contacts.push({ id: Date.now(), name: a.name, role: a.role||"", plan: a.plan||"A", stage: a.stage||"identificado", status: a.status||"new", next: a.next||"" });
+          else if (a.type === "delete_task") tasks = tasks.filter(t => t.id !== a.id);
+          else if (a.type === "delete_contact") contacts = contacts.filter(c => c.id !== a.id);
+          else if (a.type === "replace_tasks") tasks = (a.tasks||[]).map((t,i) => ({ id: Date.now()+i, text: t.text, plan: t.plan||"A", priority: t.priority||"media", done: false }));
         }
         saveContacts(); saveTasks();
       } catch(e) {}
