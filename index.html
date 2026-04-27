@@ -182,7 +182,7 @@
     <div class="form-group"><label class="form-label">Cargo / Empresa</label><input id="cf-role" /></div>
     <div class="form-group"><label class="form-label">Próximo passo</label><input id="cf-next" /></div>
     <div class="form-grid">
-      <div><label class="form-label">Plano</label><select id="cf-plan"><option>A</option><option>B</option><option>C</option></select></div>
+      <div><label class="form-label">Plano</label><select id="cf-plan"><option>A</option><option>B</option><option>C</option><option>A/B</option></select></div>
       <div><label class="form-label">Estágio</label><select id="cf-stage"></select></div>
       <div><label class="form-label">Status</label><select id="cf-status"></select></div>
     </div>
@@ -202,7 +202,7 @@
     <div class="modal-title" id="task-modal-title">Pendência</div>
     <div class="form-group"><label class="form-label">Descrição</label><textarea id="tf-text" rows="2" style="resize:vertical;"></textarea></div>
     <div class="form-grid-2">
-      <div><label class="form-label">Plano</label><select id="tf-plan"><option>A</option><option>B</option><option>C</option></select></div>
+      <div><label class="form-label">Plano</label><select id="tf-plan"><option>A</option><option>B</option><option>C</option><option>A/B</option></select></div>
       <div><label class="form-label">Prioridade</label><select id="tf-priority"><option value="alta">alta</option><option value="media">media</option><option value="baixa">baixa</option></select></div>
     </div>
     <div class="modal-actions">
@@ -230,6 +230,7 @@ const STATUS_OPTS = [
   { key: "new", label: "Novo", color: "#888780" },
 ];
 const PLAN_STYLES = {
+  "A/B": { bg: "#FEF3E2", color: "#7A4500" },
   A: { bg: "#E6F1FB", color: "#0C447C" },
   B: { bg: "#EAF3DE", color: "#27500A" },
   C: { bg: "#EEEDFE", color: "#3C3489" },
@@ -325,7 +326,7 @@ function renderCRM() {
     `<button class="filter-btn ${planFilter===p?"active":""}" onclick="setPlanFilter('${p}')">${p==="todos"?"Todos":"Plano "+p}</button>`
   ).join("") ;
 
-  const filtered = planFilter === "todos" ? contacts : contacts.filter(c => c.plan === planFilter);
+  const filtered = planFilter === "todos" ? contacts : contacts.filter(c => c.plan === planFilter || c.plan === "A/B");
   const kanban = document.getElementById("kanban");
   if (!kanban) return;
 
@@ -365,7 +366,7 @@ function renderTasks() {
     `<button class="filter-btn ${taskFilter===p?"active":""}" onclick="setTaskFilter('${p}')">${p==="todos"?"Todos":"Plano "+p}</button>`
   ).join("") + `<button class="done-toggle" onclick="toggleDone()">${showDone?"Ocultar concluídas":"Ver concluídas"}</button>`;
 
-  let list = taskFilter === "todos" ? tasks : tasks.filter(t => t.plan === taskFilter);
+  let list = taskFilter === "todos" ? tasks : tasks.filter(t => t.plan === taskFilter || t.plan === "A/B");
   if (!showDone) list = list.filter(t => !t.done);
   const pending = list.filter(t => !t.done);
   const done = list.filter(t => t.done);
